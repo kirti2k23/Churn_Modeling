@@ -2,6 +2,11 @@ class MyCustomException(Exception):
 
     def __init__(self, error:Exception):
 
+        # If error is already a string, noe tarceback needed
+        if isinstance(error,str):
+            super().__init__(error)
+            return
+
         # Traceback original error location
         tb = error.__traceback__
 
@@ -19,3 +24,7 @@ class MyCustomException(Exception):
         # Initialize base Exception with this message
         super().__init__(message)
 
+# try:
+#     a = 10/0
+# except Exception as e:
+#     raise(MyCustomException(e))
