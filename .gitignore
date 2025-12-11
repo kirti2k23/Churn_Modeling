@@ -211,4 +211,5 @@ __marimo__/
 # .CHURN_MODELING.egg-info
 .logs
 notebook/
+data/
 # .env
