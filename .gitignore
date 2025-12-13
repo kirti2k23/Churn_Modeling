@@ -210,6 +210,6 @@ __marimo__/
 # My file
 # .CHURN_MODELING.egg-info
 .logs
-notebook/
+# notebook/
 data/
 # .env
