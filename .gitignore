@@ -212,4 +212,5 @@ __marimo__/
 .logs
 # notebook/
 data/
+Artifacts/
 # .env
