@@ -50,31 +50,24 @@ class ModelTrainer:
             model_report = evaluate_model(X_train,y_train,X_test,y_test,models)
 
             ## To get best model score from dict
-            # best_model_score = max(sorted(model_report.values()))
+            best_model_name = max(model_report.keys(), key=lambda x: model_report[x][0])  # Using F1 score as criteria
+            best_model_score = model_report[best_model_name][0]
+            best_model = models[best_model_name]
 
-            # ## To get best model name from dict
+            logging.info(f"Best found model: {best_model_name} with F1 score: {best_model_score}")
 
-            # best_model_name = list(model_report.keys())[
-            #     list(model_report.values()).index(best_model_score)
-            # ]
-            # best_model = models[best_model_name]
-
-            best_model = max(model_report, key=model_report.get)
-            best_score = model_report[best_model]
-
-            # if best_score < 0.6:
-            #     raise MyCustomException("No best model found")
-            logging.info(f"Best found model on both training and testing dataset")
+            # Train the best model on full training data
+            best_model.fit(X_train, y_train)
 
             save_object(
                 file_path=self.model_config.model_path,
                 obj=best_model
             )
 
-            predicted=models[best_model].predict(X_test)
+            predicted = best_model.predict(X_test)
+            score = f1_score(y_test, predicted)
 
-            score = f1_score(y_test,predicted)
-
+            logging.info(f"Model saved successfully. Test F1 Score: {score}")
             return score
 
         except Exception as e:

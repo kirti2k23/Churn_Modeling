@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Modeling - Customer Churn Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .prediction-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: block;
+            margin: 30px auto 0;
+            width: 200px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .results-section {
+            margin: 40px 0;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #e1e8ed;
+            text-align: center;
+        }
+
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .result-high-risk {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .result-low-risk {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .result-high-risk h4,
+        .result-low-risk h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .prediction-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .prediction-details p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e1e8ed;
+        }
+
+        .feature-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Churn Modeling</h1>
+            <p>Predict Customer Churn with Machine Learning</p>
+        </div>
+
+        <div class="content">
+            <div class="description">
+                <p>Our advanced churn prediction model analyzes customer behavior and characteristics to identify individuals likely to discontinue their services. Enter customer details below to get an instant churn probability prediction.</p>
+            </div>
+
+            <form class="prediction-form" action="/predict" method="POST">
+                <div class="form-section">
+                    <h3>👤 Personal Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="credit_score">Credit Score</label>
+                            <input type="number" id="credit_score" name="creditscore" min="300" max="900" placeholder="Enter credit score (300-900)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" name="age" min="18" max="100" placeholder="Enter age" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="geography">Geography</label>
+                            <select id="geography" name="geography" required>
+                                <option value="">Select Country</option>
+                                <option value="France">France</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Spain">Spain</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🏦 Banking Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tenure">Tenure (Years)</label>
+                            <input type="number" id="tenure" name="tenure" min="0" max="10" placeholder="Years with bank" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="balance">Account Balance</label>
+                            <input type="number" id="balance" name="balance" min="0" step="0.01" placeholder="Account balance (€)" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="num_products">Number of Products</label>
+                            <input type="number" id="num_products" name="numofproducts" min="1" max="4" placeholder="Number of products" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estimated_salary">Estimated Salary</label>
+                            <input type="number" id="estimated_salary" name="estimatedsalary" min="0" step="0.01" placeholder="Annual salary (€)" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>💳 Account Status</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="has_credit_card">Has Credit Card</label>
+                            <select id="has_credit_card" name="hascrcard" required>
+                                <option value="">Select Option</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="is_active">Is Active Member</label>
+                            <select id="is_active" name="isactivemember" required>
+                                <option value="">Select Option</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">🔮 Predict Churn Risk</button>
+            </form>
+
+            {% if results is defined %}
+            <div class="results-section">
+                <div class="result-card">
+                    <h3>🎯 Prediction Result</h3>
+                    {% if results == 1 %}
+                        <div class="result-high-risk">
+                            <h4>⚠️ High Churn Risk</h4>
+                            <p>This customer is likely to churn. Consider implementing retention strategies such as personalized offers, improved customer service, or loyalty programs.</p>
+                        </div>
+                    {% else %}
+                        <div class="result-low-risk">
+                            <h4>✅ Low Churn Risk</h4>
+                            <p>This customer shows low risk of churning. Continue providing excellent service to maintain customer satisfaction.</p>
+                        </div>
+                    {% endif %}
+                    <div class="prediction-details">
+                        <p><strong>Prediction Value:</strong> {{ results }}</p>
+                        <p><small>0 = Low Risk (Will Stay), 1 = High Risk (Will Churn)</small></p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="features-list">
+                <div class="feature-card">
+                    <h4>🤖 Machine Learning</h4>
+                    <p>Powered by advanced ML algorithms including XGBoost, CatBoost, and Random Forest</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Real-time Analysis</h4>
+                    <p>Get instant predictions with detailed probability scores</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎯 High Accuracy</h4>
+                    <p>Trained on comprehensive customer datasets for reliable predictions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
